@@ -16,7 +16,7 @@ jobs:
             base-devel gcc make git python \
             qt6-base qt6-declarative qt6-multimedia qt6-wayland
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Validate translations
         run: python tools/check-i18n.py
@@ -47,7 +47,7 @@ jobs:
           cp pkgbuild/rack.desktop pkgbuild/rack.svg dist/rack/
           tar -C dist -czf rack-x86_64.tar.gz rack
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: rack-x86_64
           path: rack-x86_64.tar.gz
