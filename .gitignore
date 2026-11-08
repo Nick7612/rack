@@ -1,0 +1,9 @@
+build/
+*.o
+*.moc
+moc_*.cpp
+qrc_*.cpp
+pkgbuild/*.pkg.tar.*
+pkgbuild/src/
+pkgbuild/pkg/
+.qtc_clangd/

@@ -1,0 +1,21 @@
+[Desktop Entry]
+Type=Application
+Name=Rack
+GenericName=Billiards
+Comment=Two-player 8-ball and 9-ball over your local network
+Comment[da]=To-spiller 8-ball og 9-ball over dit lokale netværk
+Comment[de]=8-Ball und 9-Ball für zwei Spieler in deinem lokalen Netzwerk
+Comment[es]=Bola 8 y bola 9 para dos jugadores en tu red local
+Comment[fr]=8-billes et 9-billes à deux sur votre réseau local
+Comment[pt_BR]=Bola 8 e bola 9 para dois jogadores na sua rede local
+Exec=rack %f
+Icon=rack
+Terminal=false
+Categories=Game;BoardGame;
+Keywords=billiards;pool;8-ball;9-ball;multiplayer;lan;
+Keywords[da]=billiard;pool;8-ball;9-ball;multiplayer;lan;
+Keywords[de]=Billard;Pool;8-Ball;9-Ball;Mehrspieler;LAN;
+Keywords[es]=billar;pool;bola 8;bola 9;multijugador;lan;
+Keywords[fr]=billard;pool;8-billes;9-billes;multijoueur;lan;
+Keywords[pt_BR]=bilhar;sinuca;bola 8;bola 9;multijogador;lan;
+StartupWMClass=rack

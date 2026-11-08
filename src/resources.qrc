@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Main.qml</file>
+        <file>Home.qml</file>
+        <file>Join.qml</file>
+        <file>Lobby.qml</file>
+        <file>GameView.qml</file>
+        <file>RulesPicker.qml</file>
+        <file>RackButton.qml</file>
+        <file>PlayerPanel.qml</file>
+        <file>ChatPanel.qml</file>
+        <file>ShortcutsOverlay.qml</file>
+        <file>Blocked.qml</file>
+        <file>i18n/en.json</file>
+        <file>i18n/da.json</file>
+        <file>i18n/de.json</file>
+        <file>i18n/es.json</file>
+        <file>i18n/fr.json</file>
+        <file>i18n/pt-BR.json</file>
+        <file alias="sounds/click.wav">../sounds/click.wav</file>
+        <file alias="sounds/rail.wav">../sounds/rail.wav</file>
+        <file alias="sounds/pocket.wav">../sounds/pocket.wav</file>
+    </qresource>
+</RCC>

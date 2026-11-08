@@ -1,0 +1,53 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install dependencies
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel gcc make git python \
+            qt6-base qt6-declarative qt6-multimedia qt6-wayland
+
+      - uses: actions/checkout@v4
+
+      - name: Validate translations
+        run: python tools/check-i18n.py
+
+      - name: Build
+        run: bin/build
+
+      - name: Test
+        run: bin/test
+
+      - name: Check the Omarchy verdict is valid JSON
+        run: |
+          # CI is not Omarchy, so --check must exit 1 with a report, not crash.
+          set +e
+          output=$(./build/rack --check)
+          status=$?
+          set -e
+          echo "$output"
+          test "$status" -eq 1
+          python -c 'import json, sys; json.loads(sys.argv[1])' "$output"
+
+      - name: Package the binary
+        run: |
+          mkdir -p dist/rack
+          cp build/rack dist/rack/
+          cp LICENSE README.md dist/rack/
+          cp docs/RULES.md docs/PROTOCOL.md dist/rack/
+          cp pkgbuild/rack.desktop pkgbuild/rack.svg dist/rack/
+          tar -C dist -czf rack-x86_64.tar.gz rack
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rack-x86_64
+          path: rack-x86_64.tar.gz

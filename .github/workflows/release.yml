@@ -1,0 +1,53 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install dependencies
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel gcc make git \
+            qt6-base qt6-declarative qt6-multimedia qt6-wayland
+
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: bin/build
+
+      - name: Package the binary
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          mkdir -p dist/rack
+          cp build/rack dist/rack/
+          cp LICENSE README.md dist/rack/
+          cp docs/RULES.md docs/PROTOCOL.md dist/rack/
+          cp pkgbuild/rack.desktop pkgbuild/rack.svg dist/rack/
+          tar -C dist -czf "rack-${version}-x86_64.tar.gz" rack
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rack-release
+          path: rack-*-x86_64.tar.gz
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: rack-release
+
+      - name: Publish the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: rack-*-x86_64.tar.gz
+          generate_release_notes: true
