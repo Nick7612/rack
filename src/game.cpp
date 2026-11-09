@@ -421,6 +421,8 @@ void Game::finishTurn(bool foul, const QString &reason, const QList<int> &object
     setMessage(tr("%1 to shoot.").arg(m_names[m_current]));
     if (objectPockets.isEmpty())
         switchTurn();
+    else
+        m_phase = Aiming;
     emit changed();
 }
 
@@ -441,6 +443,11 @@ void Game::evaluateEightBall()
         return;
     }
 
+    // Whether the shooter was already on the 8 before this shot decided
+    // which ball had to be contacted first. Using the current count would
+    // penalise a player for pocketing their last group ball.
+    const bool wasOnEight = groupsAssigned() && m_remainingBeforeShot == 0;
+
     bool foul = false;
     QString reason;
     if (m_firstContact < 0) {
@@ -452,10 +459,10 @@ void Game::evaluateEightBall()
     } else if (!groupsAssigned() && m_firstContact == 8) {
         foul = true;
         reason = tr("The 8-ball was hit first.");
-    } else if (groupsAssigned() && onEight(m_current) && m_firstContact != 8) {
+    } else if (wasOnEight && m_firstContact != 8) {
         foul = true;
         reason = tr("The 8-ball must be hit first.");
-    } else if (groupsAssigned() && !onEight(m_current)
+    } else if (groupsAssigned() && !wasOnEight
                && groupOfBall(m_firstContact) != m_group[m_current]) {
         foul = true;
         reason = tr("The wrong group was hit first.");
@@ -479,10 +486,14 @@ void Game::evaluateEightBall()
     }
 
     if (wasBreak) {
-        if (objects.isEmpty())
+        if (objects.isEmpty()) {
             switchTurn();
-        else
+        } else {
+            // A pot on the break keeps the breaker at the table, and the
+            // table stays open.
+            m_phase = Aiming;
             setMessage(tr("%1 to shoot.").arg(m_names[m_current]));
+        }
         return;
     }
 
@@ -513,6 +524,8 @@ void Game::evaluateEightBall()
 
     if (!pocketedOwn)
         switchTurn();
+    else
+        m_phase = Aiming;
     emit changed();
 }
 
@@ -562,6 +575,8 @@ void Game::evaluateNineBall()
     if (objects.isEmpty()) {
         switchTurn();
     } else {
+        // A legal pot keeps the shooter at the table.
+        m_phase = Aiming;
         setMessage(tr("%1 to shoot.").arg(m_names[m_current]));
         Q_UNUSED(wasBreak)
         emit changed();

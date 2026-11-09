@@ -34,6 +34,8 @@ private slots:
     void nineBallWrongFirstContactIsAFoul();
     void legalMissPassesTheTurn();
     void ballInHandPlacementRestoresTheCue();
+    void potOnTheBreakKeepsTheTurn();
+    void legalPotKeepsTheTurn();
 
     void snapshotRoundTrips();
     void protocolRoundTrips();
@@ -325,6 +327,44 @@ void RackTests::ballInHandPlacementRestoresTheCue()
     QCOMPARE(game.phase(), int(Game::Aiming));
     QVERIFY(game.m_physics.find(0)->active);
     QVERIFY(std::abs(game.m_physics.find(0)->x - 1.0) < 1e-9);
+}
+
+void RackTests::potOnTheBreakKeepsTheTurn()
+{
+    Game game;
+    clearTable(game, Game::EightBall);
+    add(game, 1, 1.0, 0.5);
+    game.m_isBreak = true;
+    game.m_physics.find(1)->active = false;
+    game.m_pocketedThisShot = {1};
+    game.m_firstContact = 1;
+    game.m_railAfterContact = true;
+    game.finishShot();
+
+    QCOMPARE(game.phase(), int(Game::Aiming));
+    QCOMPARE(game.currentPlayer(), 0);
+    QCOMPARE(game.group0(), 0);
+    QCOMPARE(game.group1(), 0);
+}
+
+void RackTests::legalPotKeepsTheTurn()
+{
+    Game game;
+    clearTable(game, Game::EightBall);
+    game.m_group[0] = 1;
+    game.m_group[1] = 2;
+    add(game, 0, 0.5, 0.5);
+    add(game, 1, 1.0, 0.5);
+    add(game, 9, 2.0, 1.0);
+    game.m_physics.find(1)->active = false;
+    game.m_pocketedThisShot = {1};
+    game.m_firstContact = 1;
+    game.m_railAfterContact = true;
+    game.m_remainingBeforeShot = 1;
+    game.finishShot();
+
+    QCOMPARE(game.phase(), int(Game::Aiming));
+    QCOMPARE(game.currentPlayer(), 0);
 }
 
 void RackTests::snapshotRoundTrips()
