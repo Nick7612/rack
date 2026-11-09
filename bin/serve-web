@@ -1,0 +1,9 @@
+#!/bin/sh
+# Serve the browser build locally: bin/serve-web [PORT]
+set -eu
+
+ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+PORT="${1:-8080}"
+
+cd "$ROOT/web"
+exec python3 -m http.server "$PORT" --bind 127.0.0.1

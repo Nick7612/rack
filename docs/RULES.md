@@ -1,8 +1,9 @@
 # Rules
 
 Rack ships two games. Both are simplified for a fast two-player table: there
-are no referees, no called pockets, and no shot clocks. The host's copy of the
-game is the only authority, so both players always see the same table.
+are no referees, no called pockets, and no shot clocks. One copy of the game is
+the only authority — the host in a network match, or the current device in
+local and browser play — so both players always see the same table.
 
 ## 8-Ball
 

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0d1512">
+    <meta name="description" content="Rack — play 8-ball and 9-ball in your browser. Two players, one screen, no install.">
+    <title>Rack — 8-Ball &amp; 9-Ball</title>
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="app">
+    <section id="home-screen" class="screen home">
+        <div class="home-inner">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true"><span>8</span></div>
+                <div class="brand-text">
+                    <h1>Rack</h1>
+                    <p>8-ball &amp; 9-ball, right in your browser.</p>
+                </div>
+            </div>
+
+            <div class="menu-card">
+                <h2>Play a match</h2>
+                <p class="menu-sub">Two players, one screen. Take turns at the table.</p>
+                <div class="menu-grid">
+                    <button class="btn btn-primary" data-start="match" data-rules="0">
+                        <span class="btn-kicker">Two players</span>
+                        <span class="btn-title">8-Ball</span>
+                        <span class="btn-note">Solids vs. stripes</span>
+                    </button>
+                    <button class="btn btn-primary" data-start="match" data-rules="1">
+                        <span class="btn-kicker">Two players</span>
+                        <span class="btn-title">9-Ball</span>
+                        <span class="btn-note">Lowest ball first</span>
+                    </button>
+                    <button class="btn" data-start="practice" data-rules="0">
+                        <span class="btn-kicker">Solo</span>
+                        <span class="btn-title">Practice 8-Ball</span>
+                        <span class="btn-note">Clear the table</span>
+                    </button>
+                    <button class="btn" data-start="practice" data-rules="1">
+                        <span class="btn-kicker">Solo</span>
+                        <span class="btn-title">Practice 9-Ball</span>
+                        <span class="btn-note">Run the rack</span>
+                    </button>
+                </div>
+                <div class="menu-actions">
+                    <button class="btn-link" id="btn-rules">How to play</button>
+                    <span class="dot" aria-hidden="true">·</span>
+                    <button class="btn-link" id="btn-sound">Sound: on</button>
+                </div>
+            </div>
+
+            <p class="home-foot">No install, no account. Works offline once loaded.</p>
+        </div>
+    </section>
+
+    <section id="game-screen" class="screen game" hidden>
+        <header class="game-top">
+            <div class="player-card" id="player-card-0">
+                <div class="player-name" id="name-0">Player 1</div>
+                <div class="player-meta">
+                    <span class="chip" id="group-0">Open table</span>
+                    <span class="left" id="left-0"></span>
+                </div>
+            </div>
+
+            <div class="status">
+                <div class="status-rule" id="rule-label">8-Ball</div>
+                <div class="status-message" id="message">Player 1 breaks.</div>
+                <div class="status-hint" id="status-hint"></div>
+            </div>
+
+            <div class="player-card" id="player-card-1">
+                <div class="player-name" id="name-1">Player 2</div>
+                <div class="player-meta">
+                    <span class="chip" id="group-1">Open table</span>
+                    <span class="left" id="left-1"></span>
+                </div>
+            </div>
+
+            <button class="btn-icon" id="btn-leave" title="Leave the table" aria-label="Leave the table">✕</button>
+        </header>
+
+        <div class="table-wrap">
+            <canvas id="table" aria-label="Billiards table"></canvas>
+            <div class="winner" id="winner" hidden>
+                <div class="winner-card">
+                    <div class="winner-kicker" id="winner-kicker">Match over</div>
+                    <h2 id="winner-name">Player 1 wins</h2>
+                    <p id="winner-reason"></p>
+                    <div class="winner-actions">
+                        <button class="btn btn-primary" id="btn-rematch">Rematch</button>
+                        <button class="btn" id="btn-home">Home</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="game-bottom">
+            <div class="power">
+                <span class="power-label">Power</span>
+                <div class="power-track"><div class="power-fill" id="power-fill"></div></div>
+                <span class="power-value" id="power-value">55%</span>
+            </div>
+            <p class="game-hint" id="game-hint">Move to aim · drag to set power · release to shoot</p>
+            <div class="game-actions">
+                <button class="btn-small" id="btn-game-rules">Rules</button>
+                <button class="btn-small" id="btn-game-sound">Sound on</button>
+            </div>
+        </footer>
+    </section>
+</div>
+
+<dialog id="rules-dialog">
+    <form method="dialog" class="dialog-card">
+        <h2>How to play</h2>
+        <div class="rules-cols">
+            <section>
+                <h3>Controls</h3>
+                <ul>
+                    <li><b>Move</b> the pointer to aim.</li>
+                    <li><b>Press and drag</b> away to set power, then release to shoot.</li>
+                    <li><b>Arrow keys</b> aim, <b>Up/Down</b> set power, <b>Space</b> shoots.</li>
+                    <li>On a foul, click a legal spot to place the cue ball.</li>
+                </ul>
+            </section>
+            <section>
+                <h3>8-Ball</h3>
+                <ul>
+                    <li>The break spreads the rack; the table is open until the first legal pot.</li>
+                    <li>Pot a ball to claim solids or stripes, then clear your group.</li>
+                    <li>Pot the 8-ball last to win. Pot it early or with a foul and you lose.</li>
+                    <li>Fouls give the other player ball in hand.</li>
+                </ul>
+            </section>
+            <section>
+                <h3>9-Ball</h3>
+                <ul>
+                    <li>Always hit the lowest-numbered ball first.</li>
+                    <li>Any legally pocketed ball keeps you at the table.</li>
+                    <li>Pot the 9-ball legally — at any time — to win.</li>
+                    <li>Fouls give ball in hand; a fouled 9-ball is spotted.</li>
+                </ul>
+            </section>
+        </div>
+        <button class="btn btn-primary dialog-close" value="close">Got it</button>
+    </form>
+</dialog>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

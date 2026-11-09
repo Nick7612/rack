@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Rack">
+    <defs>
+        <radialGradient id="ball" cx="36%" cy="30%" r="75%">
+            <stop offset="0" stop-color="#565656"/>
+            <stop offset="0.42" stop-color="#171717"/>
+            <stop offset="1" stop-color="#000"/>
+        </radialGradient>
+        <radialGradient id="shine" cx="32%" cy="26%" r="60%">
+            <stop offset="0" stop-color="#fff" stop-opacity="0.42"/>
+            <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+        </radialGradient>
+    </defs>
+    <circle cx="256" cy="256" r="238" fill="url(#ball)"/>
+    <circle cx="256" cy="256" r="238" fill="url(#shine)"/>
+    <circle cx="256" cy="256" r="108" fill="#f7f3e8"/>
+    <text x="256" y="256" text-anchor="middle" dominant-baseline="central"
+          font-family="ui-sans-serif, system-ui, sans-serif" font-weight="800"
+          font-size="142" fill="#111">8</text>
+</svg>
