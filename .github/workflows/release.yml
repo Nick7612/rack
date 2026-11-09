@@ -32,11 +32,14 @@ jobs:
           cp docs/RULES.md docs/PROTOCOL.md dist/rack/
           cp pkgbuild/rack.desktop pkgbuild/rack.svg dist/rack/
           tar -C dist -czf "rack-${version}-x86_64.tar.gz" rack
+          cp "rack-${version}-x86_64.tar.gz" rack-x86_64.tar.gz
 
       - uses: actions/upload-artifact@v7
         with:
           name: rack-release
-          path: rack-*-x86_64.tar.gz
+          path: |
+            rack-*-x86_64.tar.gz
+            rack-x86_64.tar.gz
 
   publish:
     needs: build
@@ -49,5 +52,7 @@ jobs:
       - name: Publish the GitHub release
         uses: softprops/action-gh-release@v3
         with:
-          files: rack-*-x86_64.tar.gz
+          files: |
+            rack-*-x86_64.tar.gz
+            rack-x86_64.tar.gz
           generate_release_notes: true

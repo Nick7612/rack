@@ -60,29 +60,47 @@ on Omarchy being there. Run `rack --check` to see the local verdict as JSON.
 
 ## Install
 
-On Omarchy, from a clone of this repository:
+Install the latest prebuilt release on Omarchy:
 
 ```sh
-bin/install
+curl -fsSL https://raw.githubusercontent.com/Nick7612/rack/main/install.sh | sudo sh
 ```
 
-That builds the app and installs it as an Arch package, so `rack` appears in
-the launcher with its icon and desktop entry. Remove it with
-`sudo pacman -R rack`.
+The installer downloads the latest x86_64 release, installs the binary,
+desktop entry, icon, and license, and refreshes the launcher cache. It never
+compiles anything.
 
-To build without installing:
+From a checkout, the same installer lives at the root:
 
 ```sh
-bin/build
-./build/rack
+sudo ./install.sh
+```
+
+If the checkout already has a `build/rack` from `bin/build`, that local build
+is installed instead of downloading a release. You can also point it at a
+specific archive:
+
+```sh
+sudo ./install.sh ./rack-0.1.0-x86_64.tar.gz
+```
+
+Remove it with:
+
+```sh
+sudo rm -f /usr/bin/rack \
+  /usr/share/applications/rack.desktop \
+  /usr/share/icons/hicolor/scalable/apps/rack.svg
+sudo rm -rf /usr/share/licenses/rack
 ```
 
 ### Requirements
 
-- Omarchy with Hyprland
-- Qt 6 base, declarative, multimedia, and Wayland modules
-- `qmake6`, `make`, and a C++17 compiler
-- `xdg-desktop-portal` (already part of Omarchy)
+Rack runs on Omarchy with Hyprland and the Qt 6 base, declarative, multimedia,
+and Wayland runtime modules; `xdg-desktop-portal` is already part of Omarchy.
+
+Building from source also needs `qmake6`, `make`, and a C++17 compiler. The
+prebuilt release is x86_64; on other architectures, build with `bin/build` and
+then run `bin/install`.
 
 ## Multiplayer
 
@@ -121,8 +139,10 @@ them if your firewall prompts.
 ```sh
 bin/build     # qmake6 + make into build/rack
 bin/test      # build and run the Qt Test suite offscreen
-bin/install   # build and install the Arch package
+bin/install   # install the local build with sudo (never builds)
 ```
+
+To run the local build without installing it, use `./build/rack`.
 
 The build is a flat Qt project: `rack.pro` at the root, C++ and QML together in
 `src/`, sounds in `sounds/`, tests in `tests/`, and packaging in `pkgbuild/`.
