@@ -60,4 +60,4 @@ jobs:
         with:
           node-version: 22
       - name: Test the browser game
-        run: node --test web/tests/
+        run: node --test web/tests/*.test.mjs

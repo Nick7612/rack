@@ -51,7 +51,7 @@ release to shoot.
 
 ```sh
 bin/serve-web          # http://127.0.0.1:8080
-node --test web/tests/ # rules and physics tests
+node --test web/tests/*.test.mjs # rules and physics tests
 ```
 
 The site is static, so any web server works. There is no npm install and no
