@@ -2,6 +2,7 @@
 
 import { TABLE, inPocket } from './physics.js';
 import { PHASE, RULES, isStripe } from './game.js';
+import { firstHit, contactGuide, reflectedDir } from './aim.js';
 
 const RAIL = 0.115;
 
@@ -317,59 +318,30 @@ export class TableView {
         }
     }
 
-    firstHit(game, cx, cy, angle) {
-        const dx = Math.cos(angle);
-        const dy = Math.sin(angle);
-        const r = TABLE.ballRadius;
-        let best = null;
-
-        for (const ball of game.physics.balls) {
-            if (!ball.active || ball.id === 0)
-                continue;
-            const toX = ball.x - cx;
-            const toY = ball.y - cy;
-            const along = toX * dx + toY * dy;
-            if (along <= 0)
-                continue;
-            const cross = Math.abs(toX * dy - toY * dx);
-            const diameter = 2 * r;
-            if (cross > diameter)
-                continue;
-            const back = Math.sqrt(Math.max(0, diameter * diameter - cross * cross));
-            const distance = along - back;
-            if (distance > 0 && (!best || distance < best.distance)) {
-                best = {
-                    distance,
-                    x: cx + dx * distance,
-                    y: cy + dy * distance,
-                    ball,
-                };
-            }
-        }
-
-        // Cushions.
-        const candidates = [];
-        if (dx < 0) candidates.push((r - cx) / dx);
-        if (dx > 0) candidates.push((TABLE.width - r - cx) / dx);
-        if (dy < 0) candidates.push((r - cy) / dy);
-        if (dy > 0) candidates.push((TABLE.height - r - cy) / dy);
-        for (const distance of candidates) {
-            if (distance <= 0 || !Number.isFinite(distance))
-                continue;
-            const x = cx + dx * distance;
-            const y = cy + dy * distance;
-            if (x < r - 1e-6 || x > TABLE.width - r + 1e-6
-                || y < r - 1e-6 || y > TABLE.height - r + 1e-6)
-                continue;
-            if (!best || distance < best.distance)
-                best = { distance, x, y, ball: null };
-        }
-
-        return best;
+    guideLine(ctx, x0, y0, x1, y1, from, to, width, dash = []) {
+        if (Math.hypot(x1 - x0, y1 - y0) < 0.5)
+            return;
+        const gradient = ctx.createLinearGradient(x0, y0, x1, y1);
+        gradient.addColorStop(0, from);
+        gradient.addColorStop(1, to);
+        ctx.save();
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = width;
+        ctx.lineCap = 'round';
+        ctx.setLineDash(dash);
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+        ctx.restore();
     }
 
     drawAim(ctx, game) {
         if (game.phase !== PHASE.AIMING)
+            return;
+        // Online, only the player whose turn it is sees the guide. The other
+        // player would otherwise see a stale line that cannot be moved.
+        if (game.myPlayer >= 0 && game.current !== game.myPlayer)
             return;
         const cue = game.physics.find(0);
         if (!cue || !cue.active || game.winner >= 0)
@@ -380,25 +352,91 @@ export class TableView {
         const cx = this.sx(cue.x);
         const cy = this.sy(cue.y);
         const angle = game.aimAngle;
-        const hit = this.firstHit(game, cue.x, cue.y, angle);
+        const hit = firstHit(game.physics.balls, cue.x, cue.y, angle);
 
         if (hit) {
-            ctx.save();
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-            ctx.lineWidth = 1.2;
-            ctx.setLineDash([5, 6]);
-            ctx.beginPath();
-            ctx.moveTo(cx + Math.cos(angle) * r, cy - Math.sin(angle) * r);
-            ctx.lineTo(this.sx(hit.x), this.sy(hit.y));
-            ctx.stroke();
-            ctx.restore();
+            const hx = this.sx(hit.x);
+            const hy = this.sy(hit.y);
+
+            // Cue-ball track, from the edge of the ball to the contact point.
+            this.guideLine(
+                ctx,
+                cx + Math.cos(angle) * r,
+                cy - Math.sin(angle) * r,
+                hx, hy,
+                'rgba(255, 255, 255, 0.38)',
+                'rgba(255, 214, 10, 0.62)',
+                1.3,
+                [5, 6],
+            );
 
             if (hit.ball) {
+                const guide = contactGuide(hit, angle);
+                const bx = this.sx(hit.ball.x);
+                const by = this.sy(hit.ball.y);
+
+                // Object-ball line: the short white line every pool game
+                // draws to show where the pot goes.
+                if (guide) {
+                    const ex = this.sx(hit.ball.x + guide.objectDir.x * guide.objectLength);
+                    const ey = this.sy(hit.ball.y + guide.objectDir.y * guide.objectLength);
+                    this.guideLine(
+                        ctx,
+                        bx, by, ex, ey,
+                        'rgba(255, 255, 255, 0.72)',
+                        'rgba(255, 255, 255, 0.08)',
+                        2.2,
+                        [7, 5],
+                    );
+
+                    // Cue ball leaves along the tangent after a cut.
+                    if (guide.cueDir && guide.cueLength > 0.02) {
+                        const dx = this.sx(hit.x + guide.cueDir.x * guide.cueLength);
+                        const dy = this.sy(hit.y + guide.cueDir.y * guide.cueLength);
+                        this.guideLine(
+                            ctx,
+                            hx, hy, dx, dy,
+                            'rgba(255, 214, 10, 0.5)',
+                            'rgba(255, 214, 10, 0.05)',
+                            1.5,
+                            [3, 4],
+                        );
+                    }
+                }
+
+                // Ghost ball: where the cue ball has to arrive.
+                ctx.save();
                 ctx.beginPath();
-                ctx.arc(this.sx(hit.x), this.sy(hit.y), r, 0, Math.PI * 2);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.arc(hx, hy, r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255, 214, 10, 0.72)';
                 ctx.lineWidth = 1.4;
+                ctx.setLineDash([3, 3]);
                 ctx.stroke();
+                ctx.restore();
+
+                // A small ring around the object ball being struck.
+                ctx.beginPath();
+                ctx.arc(bx, by, r + 1, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            } else if (hit.normal) {
+                // No ball in the way: show one short cushion bounce.
+                const direction = { x: Math.cos(angle), y: Math.sin(angle) };
+                const bounced = reflectedDir(direction, hit.normal);
+                const length = Math.min(0.45, TABLE.width * 0.18);
+                const ex = this.sx(hit.x + bounced.x * length);
+                const ey = this.sy(hit.y + bounced.y * length);
+                this.guideLine(
+                    ctx,
+                    hx, hy, ex, ey,
+                    'rgba(255, 214, 10, 0.34)',
+                    'rgba(255, 214, 10, 0.02)',
+                    1.2,
+                    [4, 5],
+                );
             }
         }
 

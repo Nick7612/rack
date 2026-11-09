@@ -1,6 +1,6 @@
 // Cache the whole game so it keeps working with no network after the first
 // visit. Bump CACHE when shipping new assets.
-const CACHE = 'rack-v1';
+const CACHE = 'rack-v2';
 
 const ASSETS = [
     './',
@@ -11,6 +11,11 @@ const ASSETS = [
     './js/physics.js',
     './js/render.js',
     './js/audio.js',
+    './js/aim.js',
+    './js/music.js',
+    './js/net.js',
+    './js/room.js',
+    './vendor/peerjs.min.js',
     './sounds/click.wav',
     './sounds/rail.wav',
     './sounds/pocket.wav',

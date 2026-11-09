@@ -1,7 +1,7 @@
 {
     "name": "Rack — 8-Ball & 9-Ball",
     "short_name": "Rack",
-    "description": "Two-player 8-ball and 9-ball in your browser. No install, no account.",
+    "description": "Play 8-ball and 9-ball with a friend online or on one screen. No install, no account.",
     "start_url": "./",
     "scope": "./",
     "display": "standalone",

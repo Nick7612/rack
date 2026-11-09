@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#0d1512">
-    <meta name="description" content="Rack — play 8-ball and 9-ball in your browser. Two players, one screen, no install.">
+    <meta name="description" content="Rack — play 8-ball and 9-ball with a friend online or on one screen. No install, no account.">
     <title>Rack — 8-Ball &amp; 9-Ball</title>
     <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="manifest" href="manifest.webmanifest">
@@ -18,13 +18,36 @@
                 <div class="brand-mark" aria-hidden="true"><span>8</span></div>
                 <div class="brand-text">
                     <h1>Rack</h1>
-                    <p>8-ball &amp; 9-ball, right in your browser.</p>
+                    <p>8-ball &amp; 9-ball, together or in the same room.</p>
                 </div>
             </div>
 
             <div class="menu-card">
+                <div class="names-row">
+                    <label class="name-field">
+                        <span>Player 1</span>
+                        <input id="name-input-0" class="text-input" maxlength="20" autocomplete="nickname" value="Player 1">
+                    </label>
+                    <label class="name-field">
+                        <span>Player 2</span>
+                        <input id="name-input-1" class="text-input" maxlength="20" autocomplete="nickname" value="Player 2">
+                    </label>
+                </div>
+
                 <h2>Play a match</h2>
-                <p class="menu-sub">Two players, one screen. Take turns at the table.</p>
+                <p class="menu-sub">Take turns on one screen, or open a live room with a friend.</p>
+
+                <button class="online-cta" id="btn-online" type="button">
+                    <span class="online-cta-icon" aria-hidden="true">⇄</span>
+                    <span class="online-cta-text">
+                        <b>Play with a friend</b>
+                        <small>Host a room or join with a code</small>
+                    </span>
+                    <span class="online-cta-arrow" aria-hidden="true">→</span>
+                </button>
+
+                <div class="menu-divider"><span>or play on this device</span></div>
+
                 <div class="menu-grid">
                     <button class="btn btn-primary" data-start="match" data-rules="0">
                         <span class="btn-kicker">Two players</span>
@@ -47,8 +70,11 @@
                         <span class="btn-note">Run the rack</span>
                     </button>
                 </div>
+
                 <div class="menu-actions">
                     <button class="btn-link" id="btn-rules">How to play</button>
+                    <span class="dot" aria-hidden="true">·</span>
+                    <button class="btn-link" id="btn-music">Music: on</button>
                     <span class="dot" aria-hidden="true">·</span>
                     <button class="btn-link" id="btn-sound">Sound: on</button>
                 </div>
@@ -109,11 +135,64 @@
             <p class="game-hint" id="game-hint">Move to aim · drag to set power · release to shoot</p>
             <div class="game-actions">
                 <button class="btn-small" id="btn-game-rules">Rules</button>
+                <button class="btn-small" id="btn-game-music">Music on</button>
                 <button class="btn-small" id="btn-game-sound">Sound on</button>
             </div>
         </footer>
     </section>
 </div>
+
+<dialog id="online-dialog">
+    <div class="dialog-card online-card">
+        <button class="dialog-x" id="btn-online-close" type="button" aria-label="Close">✕</button>
+
+        <div id="online-setup">
+            <div class="online-kicker">Live room</div>
+            <h2>Play with a friend</h2>
+            <p class="online-sub">Host a room and share the code, or join a table someone else opened.</p>
+
+            <label class="field-label" for="online-name">Your name</label>
+            <input class="text-input" id="online-name" maxlength="20" autocomplete="nickname" placeholder="Player">
+
+            <div class="rules-toggle" role="group" aria-label="Rules for the hosted room">
+                <button type="button" data-online-rules="0" class="active">8-Ball</button>
+                <button type="button" data-online-rules="1">9-Ball</button>
+            </div>
+
+            <button class="btn btn-primary online-action" id="btn-host" type="button">
+                <span class="btn-kicker">Create a table</span>
+                <span class="btn-title">Host a room</span>
+                <span class="btn-note">You get a code to share</span>
+            </button>
+
+            <div class="online-divider"><span>or join a room</span></div>
+
+            <div class="join-row">
+                <input class="text-input code-input" id="join-code" maxlength="7" autocomplete="off"
+                       spellcheck="false" placeholder="ROOM CODE" aria-label="Room code">
+                <button class="btn" id="btn-join" type="button">Join</button>
+            </div>
+
+            <p class="online-status" id="online-status" role="status"></p>
+            <p class="online-foot">Rooms connect your browsers directly. Both players need an internet connection.</p>
+        </div>
+
+        <div id="online-wait" hidden>
+            <div class="online-kicker">Live room</div>
+            <h2>Share this code</h2>
+            <p class="online-sub">Your friend enters it under <b>Join a room</b>.</p>
+
+            <div class="room-code" id="room-code">ABC 123</div>
+
+            <div class="online-wait-actions">
+                <button class="btn btn-primary" id="btn-copy-code" type="button">Copy code</button>
+                <button class="btn" id="btn-cancel-room" type="button">Cancel</button>
+            </div>
+
+            <p class="online-status" id="wait-status" role="status">Waiting for the other player…</p>
+        </div>
+    </div>
+</dialog>
 
 <dialog id="rules-dialog">
     <form method="dialog" class="dialog-card">
@@ -122,7 +201,7 @@
             <section>
                 <h3>Controls</h3>
                 <ul>
-                    <li><b>Move</b> the pointer to aim.</li>
+                    <li><b>Move</b> the pointer to aim; the guide shows the object ball's path.</li>
                     <li><b>Press and drag</b> away to set power, then release to shoot.</li>
                     <li><b>Arrow keys</b> aim, <b>Up/Down</b> set power, <b>Space</b> shoots.</li>
                     <li>On a foul, click a legal spot to place the cue ball.</li>
@@ -147,10 +226,12 @@
                 </ul>
             </section>
         </div>
+        <p class="rules-note"><b>Online rooms.</b> The host shares a six-character code. Both players keep their own name, and only the player whose turn it is can shoot.</p>
         <button class="btn btn-primary dialog-close" value="close">Got it</button>
     </form>
 </dialog>
 
+<script src="vendor/peerjs.min.js"></script>
 <script type="module" src="js/main.js"></script>
 </body>
 </html>
